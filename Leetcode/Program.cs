@@ -5,32 +5,104 @@
         static void Main(string[] args)
         {
             //PriorityQueue<int,int> heap = new PriorityQueue<int, int>();
-            
+            //HashSet<string> set = new HashSet<string>();
 
 
-            HashSet<string> set = new HashSet<string>();
-            ListNode a = new ListNode(1);
-            ListNode b = new ListNode(2);
-            ListNode c = new ListNode(3);
-            ListNode d = new ListNode(2);
-            ListNode e = new ListNode(2);
-            a.next = b;
-            b.next = c;
-            c.next = d;
-            d.next = e;
-            e.next = null;
-            Console.WriteLine(IsPalindrome2(a));
         }
-        static ListNode CopyRandomList(ListNode head)
+        static ListNode GetIntersectionNode(ListNode headA, ListNode headB)
+        {
+
+        }
+        static ListNode DetectCycle(ListNode head)
+        {
+            HashSet<ListNode> visited = new HashSet<ListNode>();
+
+            while (head != null)
+            {
+                if (visited.Contains(head))
+                {
+                    return head;
+                }
+                else
+                {
+                    visited.Add(head);
+                }
+                head = head.next;
+            }
+            return null;
+        }
+        static ListNode DetectCycle2(ListNode head)
+        {
+            if (head == null || head.next == null) return null;
+
+            ListNode slow = head;
+            ListNode fast = head;
+            while (fast != null)
+            {
+                slow = slow.next;
+                fast = fast.next?.next;
+
+                //slow 和 fast 指针重合后 fast回到 head  下一次他们再重合就是 环的入口
+                if (slow == fast)
+                {
+                    fast = head;
+                    while (slow != fast)
+                    {
+                        slow = slow.next;
+                        fast = fast.next;
+                    }
+                    return slow;
+                }
+            }
+            return null;
+        }
+        static bool HasCycle(ListNode head)
+        {
+            HashSet<ListNode> visited = new HashSet<ListNode>();
+
+            while (head != null)
+            {
+                if (visited.Contains(head))
+                {
+                    return true;
+                }
+                else
+                {
+                    visited.Add(head);
+                }
+                head = head.next;
+            }
+            return false;
+        }
+        static bool HasCycle2(ListNode head)
+        {
+            //使用快慢指针做
+            //还是先 排除特殊情况
+            if (head == null || head.next == null) return false;
+
+            ListNode slow = head;
+            ListNode fast = head;
+            while (fast != null)
+            {
+                slow = slow.next;
+                fast = fast.next?.next;
+                if (slow == fast)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        static Node CopyRandomList(Node head)
         {
             if (head == null) return null;
-            ListNode curr = head;
+            Node curr = head;
             //一定要用一个 dict 不然就找不到对应关系了
-            Dictionary<ListNode, ListNode> map = new Dictionary<ListNode, ListNode>();
+            Dictionary<Node, Node> map = new Dictionary<Node, Node>();
             //先复制 节点
             while (curr != null)
             {
-                map.Add(curr, new ListNode(curr.val));
+                map.Add(curr, new Node(curr.val));
                 curr = curr.next;
             }
 
@@ -38,9 +110,9 @@
             while (curr != null)
             {
                 //注意这里去map中找 不能 new 了
-                //一定要注意 rand 可能为null
+                //一定要注意 random 可能为null
                 map[curr].next = curr.next != null ? map[curr.next] : null;
-                map[curr].rand = curr.rand != null ? map[curr.rand] : null;
+                map[curr].random = curr.random != null ? map[curr.random] : null;
 
 
                 curr = curr.next;
@@ -48,16 +120,17 @@
 
             return map[head];
         }
-        static ListNode CopyRandomList2(ListNode head)
+        static Node CopyRandomList2(Node head)
         {
             if (head == null) return null;
 
-            ListNode curr = head;
+            Node curr = head;
             //利用 链表的位置关系 将 Dict 省去了
+            //1 -> 1' -> 2 -> 2' -> 3 -> 3' 
             while (curr != null)
             {
-                ListNode newCurr = new ListNode(curr.val);
-                ListNode next = curr.next;
+                Node newCurr = new Node(curr.val);
+                Node next = curr.next;
                 curr.next = newCurr;
                 newCurr.next = next;
 
@@ -65,28 +138,39 @@
                 curr = next;
             }
 
+            //先处理random指针 因为不能破坏之前的有序结构
+            curr = head;
+            Node newHead = head.next;
+            while (curr != null)
+            {
+                //原链表的下一个Node
+                Node next = curr.next.next;
+
+                curr.next.random = curr.random?.next;
+                curr = next;
+            }
+
+            //split
             curr = head;
             while (curr != null)
             {
-                //链表类的题目 要记得先记录 不然后面改变了 就不对了
-                ListNode next = curr.next.next;
-                curr.next.next = curr.next.next.next;
-                curr.next.rand = curr.rand?.next;
+                Node next = curr.next.next;
 
-                //一定记得不能破坏老链表的 结构
+                curr.next.next = next?.next;
                 curr.next = next;
-                curr = curr.next;
+
+                curr = next;
             }
-            return head.next;
+            return newHead;
         }
-        static ListNode Partition(ListNode head, int x)
+        static Node Partition(Node head, int x)
         {
-            ListNode sh = null;
-            ListNode st = null;
-            ListNode eh = null;
-            ListNode et = null;
-            ListNode bh = null;
-            ListNode bt = null;
+            Node sh = null;
+            Node st = null;
+            Node eh = null;
+            Node et = null;
+            Node bh = null;
+            Node bt = null;
 
             while (head != null)
             {
@@ -191,10 +275,10 @@
 
 
         // need n extra space
-        static bool IsPalindrome(ListNode head)
+        static bool IsPalindrome(Node head)
         {
-            Stack<ListNode> stack = new Stack<ListNode>();
-            ListNode curr = head;
+            Stack<Node> stack = new Stack<Node>();
+            Node curr = head;
             while (curr != null)
             {
                 stack.Push(curr);
@@ -211,7 +295,7 @@
             return true;
         }
         // need n/2 extra space
-        static bool IsPalindrome2(ListNode head)
+        static bool IsPalindrome2(Node head)
         {
             //捣乱的先 return
             if (head == null || head.next == null)
@@ -220,8 +304,8 @@
             }
 
             //快慢指针 找到中点
-            ListNode right = head.next;
-            ListNode cur = head;
+            Node right = head.next;
+            Node cur = head;
             //链表 快慢指针就这么写 直接记住
             while (cur.next != null && cur.next.next != null)
             {
@@ -229,7 +313,7 @@
                 cur = cur.next.next;
             }
 
-            Stack<ListNode> stack = new Stack<ListNode>();
+            Stack<Node> stack = new Stack<Node>();
             while (right != null)
             {
                 stack.Push(right);
@@ -313,16 +397,27 @@
     /// <summary>
     /// Definition for singly-linked list.
     /// </summary>
+    public class Node
+    {
+        public int val;
+        public Node next;
+
+        //有些题有一个随机指针
+        public Node random;
+        public Node(int val)
+        {
+            this.val = val;
+        }
+    }
     public class ListNode
     {
         public int val;
         public ListNode next;
 
-        //有些题有一个随机指针
-        public ListNode rand;
-        public ListNode(int val)
+        public ListNode(int val = 0, ListNode next = null)
         {
             this.val = val;
+            this.next = next;
         }
     }
 }
