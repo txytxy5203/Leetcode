@@ -6,11 +6,83 @@
         {
             //PriorityQueue<int,int> heap = new PriorityQueue<int, int>();
             //HashSet<string> set = new HashSet<string>();
-
-
+            ListNode a = new ListNode(1);
+            ListNode b = new ListNode(2);
+            ListNode c = new ListNode(3);
+            ListNode d = new ListNode(4);
+            ListNode e = new ListNode(5);
+            ListNode a1 = new ListNode(11);
+            a.next = b;
+            b.next = c;
+            c.next = d;
+            d.next = e;
+            e.next = null;
+            a1.next = d;
+            ListNode com = GetIntersectionNode(a, a1);
+            Console.WriteLine(com.val);
         }
         static ListNode GetIntersectionNode(ListNode headA, ListNode headB)
         {
+            // 对齐的思想 因为没有环的存在
+            if (headA == null || headB == null) 
+                return null;
+
+            ListNode currA = headA;
+            ListNode currB = headB;
+            int lengthA = 1;
+            int lengthB = 1;
+            while (true)
+            {
+                if(currA.next != null)
+                {
+                    currA = currA.next;
+                    lengthA++;
+                }
+                if(currB.next != null)
+                {
+                    currB = currB.next;
+                    lengthB++;
+                }
+                if (currA.next == null && currB.next == null)
+                    break;
+            }
+                      
+            if (currA != currB) 
+                return null;
+
+
+            currA = headA;
+            currB = headB;
+            if (lengthA >= lengthB)
+            {
+                int offset = lengthA - lengthB;
+                while(offset > 0)
+                {
+                    currA = currA.next;
+                    offset--;
+                }
+                while (currA != currB)
+                {
+                    currA = currA.next;
+                    currB = currB.next;
+                }
+                return currA;
+            }
+            else 
+            {
+                int offset = lengthB - lengthA;
+                while (offset > 0)
+                {
+                    currB = currB.next;
+                    offset--;
+                }
+                while (currA != currB)
+                {
+                    currA = currA.next;
+                    currB = currB.next;
+                }
+                return currA;
+            }
 
         }
         static ListNode DetectCycle(ListNode head)
