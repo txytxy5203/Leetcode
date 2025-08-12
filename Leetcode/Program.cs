@@ -1,4 +1,6 @@
-﻿namespace Leetcode
+﻿using System.Collections.Generic;
+
+namespace Leetcode
 {
     internal class Program
     {
@@ -6,24 +8,70 @@
         {
             //PriorityQueue<int,int> heap = new PriorityQueue<int, int>();
             //HashSet<string> set = new HashSet<string>();
-            ListNode a = new ListNode(1);
-            ListNode b = new ListNode(2);
-            ListNode c = new ListNode(3);
-            ListNode d = new ListNode(4);
-            ListNode e = new ListNode(5);
-            ListNode a1 = new ListNode(11);
-            a.next = b;
-            b.next = c;
-            c.next = d;
-            d.next = e;
-            e.next = null;
-            a1.next = d;
-            ListNode com = GetIntersectionNode(a, a1);
-            Console.WriteLine(com.val);
+            TreeNode a = new TreeNode(1);
+            TreeNode b = new TreeNode(2);
+            TreeNode c = new TreeNode(3);
+            TreeNode d = new TreeNode(4);
+            TreeNode e = new TreeNode(5);
+            TreeNode f = new TreeNode(6);
+            TreeNode g = new TreeNode(7);
+            a.left = b; a.right = c;
+            b.left = d; b.right = e;
+            d.left = null;d.right = null;
+            e.left = null;e.right = null;
+            c.left = f; c.right = g;
+            f.left = null;f.right = null;
+            g.left = null;g.right = null;
+
+            preOrderUnRecur(a);
         }
+        #region 二叉树
+        static IList<int> InorderTraversal(TreeNode root)
+        {
+            IList<int> result = new List<int>();
+            preOrderRecur(root, result);
+            return result;
+        }
+        static void inOrderRecur(TreeNode head, IList<int> list)
+        {
+            //中序遍历  在第二次进入节点的时候 执行逻辑
+            if (head == null)
+                return;
+            inOrderRecur(head.left, list);
+            list.Add(head.val);
+            inOrderRecur(head.right, list);
+        }
+        static void preOrderRecur(TreeNode head, IList<int> list)
+        {
+            //前序遍历 在第一次进入节点时 执行逻辑
+            if (head == null)
+                return;
+            list.Add(head.val);
+            preOrderRecur(head.left, list);
+            preOrderRecur(head.right, list);
+        }
+        static void preOrderUnRecur(TreeNode head)
+        {
+            //不使用递归的方式
+            if (head == null) return;
+            Stack<TreeNode> stack = new Stack<TreeNode>();
+            stack.Push(head);
+            while (stack.Count > 0)
+            {
+                TreeNode node = stack.Pop();
+                Console.WriteLine(node.val);
+                if (node.right != null)
+                    stack.Push(node.right);
+                if (node.left != null)
+                    stack.Push(node.left);
+            }
+        }
+        #endregion
+
         static ListNode GetIntersectionNode(ListNode headA, ListNode headB)
         {
             // 对齐的思想 因为没有环的存在
+            // 下次试一下 HashSet
             if (headA == null || headB == null) 
                 return null;
 
@@ -490,6 +538,20 @@
         {
             this.val = val;
             this.next = next;
+        }
+    }
+
+    // Definition for a binary tree node.
+    public class TreeNode
+    {
+        public int val;
+        public TreeNode left;
+        public TreeNode right;
+        public TreeNode(int val = 0, TreeNode left = null, TreeNode right = null)
+        {
+            this.val = val;
+            this.left = left;
+            this.right = right;
         }
     }
 }
