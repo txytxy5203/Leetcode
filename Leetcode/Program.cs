@@ -4,43 +4,123 @@
     {
         static void Main(string[] args)
         {
-            //TreeNode a = new TreeNode(1);
-            //TreeNode b = new TreeNode(2);
-            //TreeNode c = new TreeNode(3);
-            //TreeNode d = new TreeNode(4);
-            //TreeNode e = new TreeNode(5);
-            //TreeNode f = new TreeNode(6);
-            //TreeNode g = new TreeNode(7);
-            //a.left = b; a.right = c;
-            //b.left = d; b.right = e;
-            //d.left = null; d.right = null;
-            //e.left = null; e.right = null;
-            //c.left = f; c.right = g;
-            //f.left = null; f.right = null;
-            //g.left = null; g.right = null;
-            TreeNode a5 = new TreeNode(5);
-            TreeNode a3 = new TreeNode(3);
-            TreeNode a7 = new TreeNode(7);
-            TreeNode a2 = new TreeNode(2);
-            TreeNode a4 = new TreeNode(4);
-            TreeNode a6 = new TreeNode(6);
-            TreeNode a8 = new TreeNode(8);
-            TreeNode a1 = new TreeNode(1);
-            a5.left = a3; a5.right = a7;
-            a3.left = a2; a3.right = a4;
-            a7.left = a6; a7.right = a8;
-            a2.left = a1; a2.right = null;
-            a4.left = null; a4.right = null;
-            a6.left = null; a6.right = null;
-            a8.left = null; a8.right = null;
-            a1.left = null; a1.right = null;
+            TreeNode a = new TreeNode(1);
+            TreeNode b = new TreeNode(2);
+            TreeNode c = new TreeNode(3);
+            TreeNode d = new TreeNode(4);
+            TreeNode e = new TreeNode(5);
+            TreeNode f = new TreeNode(6);
+            a.left = b; a.right = c;
+            b.left = d; b.right = e;
+            d.left = null; d.right = null;
+            e.left = null; e.right = null;
+            c.left = f; c.right = null;
+            f.left = null; f.right = null;
+            //TreeNode a5 = new TreeNode(5);
+            //TreeNode a3 = new TreeNode(3);
+            //TreeNode a7 = new TreeNode(7);
+            //TreeNode a2 = new TreeNode(2);
+            //TreeNode a4 = new TreeNode(4);
+            //TreeNode a6 = new TreeNode(6);
+            //TreeNode a8 = new TreeNode(8);
+            //TreeNode a1 = new TreeNode(1);
+            //a5.left = a3; a5.right = a7;
+            //a3.left = a2; a3.right = a4;
+            //a7.left = a6; a7.right = a8;
+            //a2.left = a1; a2.right = null;
+            //a4.left = null; a4.right = null;
+            //a6.left = null; a6.right = null;
+            //a8.left = null; a8.right = null;
+            //a1.left = null; a1.right = null;
 
 
-            Console.WriteLine(IsValidBST(a5));
+            Console.WriteLine(IsCompleteTree2(a));
             
 
         }
         #region 二叉树
+        static bool IsCompleteTree(TreeNode root)
+        {
+            // https://leetcode.cn/problems/check-completeness-of-a-binary-tree/description/
+            // 依旧是层序遍历的思想  每一次弹出时和上一次弹出比较
+            if (root == null) return true;
+            Queue<(TreeNode, int)> queue = new Queue<(TreeNode, int)>();
+
+            int currId = 0;
+            int preNodeId = -1;
+
+            queue.Enqueue((root, currId));
+            while (queue.Count > 0)
+            {
+                // 一次性把一层的节点全部弹出  这样就做到了层序遍历
+                int curLayerCount = queue.Count;
+
+                for (int i = 0; i < curLayerCount; i++)
+                {
+                    TreeNode node;
+                    (node, currId) = queue.Dequeue();
+                    // 每一次弹出的node Id 和上一次的Node Id比较
+                    if (currId != preNodeId + 1)
+                        return false;
+                    preNodeId = currId;
+
+                    if (node.left != null)
+                    {
+                        queue.Enqueue((node.left, currId * 2 + 1));
+                    }
+                    if (node.right != null)
+                    {
+                        queue.Enqueue((node.right, currId * 2 + 2));
+                    }
+                }
+            }
+            return true;
+        }
+        static bool IsCompleteTree2(TreeNode root)
+        {
+            // 左神的解法      
+            if (root == null) return true;
+            Queue<TreeNode> queue = new Queue<TreeNode>();
+            queue.Enqueue(root);
+
+            bool checkLeaf = false;
+            while (queue.Count > 0)
+            {
+                TreeNode node;
+                node= queue.Dequeue();
+
+                //if (checkLeaf)
+                //{
+                //    if (node.left != null || node.right != null)
+                //        return false;
+                //}
+
+                //if (node.left == null && node.right != null)
+                //    return false;
+                // 上面的简写就变成这样了
+                // 1 遇到第一个子节点不全的节点后  如果有不是叶节点的节点 则return false
+                // 2 有右孩子但是没有左孩子的 则return false
+                if ((checkLeaf && (node.left != null || node.right != null))
+                    || (node.left == null && node.right != null))
+                {
+                   return false;
+                }
+
+                if (node.left != null)
+                {
+                    queue.Enqueue(node.left);
+                }
+                if (node.right != null)
+                {
+                    queue.Enqueue(node.right);
+                }
+                else
+                { 
+                    checkLeaf = true;
+                }                              
+            }
+            return true;
+        }              
         static bool IsValidBST(TreeNode root)
         {
             // https://leetcode.cn/problems/validate-binary-search-tree/description/
@@ -68,6 +148,39 @@
             if(node.val < lower || node.val > upper)
                 return false;
             return IsValidBST2(node.left, lower, node.val) && IsValidBST2(node.right, node.val, upper);
+        }
+        static bool IsValidBST3(TreeNode root)
+        {
+            // 中序遍历 不使用递归
+            // 这个代码要好好理解一下
+            if (root == null) return true;
+            Stack<TreeNode> stack = new Stack<TreeNode>();
+
+            long temp = long.MinValue;
+            while (stack.Count > 0 || root != null)
+            {
+                if (root != null)
+                {
+                    stack.Push(root);
+                    root = root.left;
+                }
+                else
+                {
+                    root = stack.Pop();
+                    if(root.val > temp)
+                    {
+                        // 一定要注意这里的顺序
+                        // 先比较再赋值
+                        temp = root.val;
+                        root = root.right;
+                    }                  
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
         }
         static int WidthOfBinaryTree(TreeNode root)
         {
