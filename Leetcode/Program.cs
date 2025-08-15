@@ -1,4 +1,6 @@
-﻿namespace Leetcode
+﻿using System.Diagnostics;
+
+namespace Leetcode
 {
     internal class Program
     {
@@ -10,12 +12,14 @@
             TreeNode d = new TreeNode(4);
             TreeNode e = new TreeNode(5);
             TreeNode f = new TreeNode(6);
+            TreeNode g = new TreeNode(7);
             a.left = b; a.right = c;
             b.left = d; b.right = e;
             d.left = null; d.right = null;
             e.left = null; e.right = null;
-            c.left = f; c.right = null;
+            c.left = f; c.right = g;
             f.left = null; f.right = null;
+            g.left = null; g.right = null;
             //TreeNode a5 = new TreeNode(5);
             //TreeNode a3 = new TreeNode(3);
             //TreeNode a7 = new TreeNode(7);
@@ -34,11 +38,58 @@
             //a1.left = null; a1.right = null;
 
 
-            Console.WriteLine(IsCompleteTree2(a));
+            Console.WriteLine(IsFullTree(a));
             
 
         }
         #region 二叉树
+        static bool IsBalanced(TreeNode root)
+        {
+            // https://leetcode.cn/problems/balanced-binary-tree/description/
+            // 左神的套路递归写法
+            // 递归仔细体会一下也就那样嘛  加油别怕
+            return IsBalancedRecur(root).isBalanced;
+        }
+        static (bool isBalanced, int depth) IsBalancedRecur(TreeNode root)
+        {
+            if (root == null)
+                return new(true, 0);
+            (bool isBalancedLeft, int depthLeft) = IsBalancedRecur(root.left);
+            (bool isBalancedRight, int depthRight) = IsBalancedRecur(root.right);
+            return (isBalancedLeft && isBalancedRight && Math.Abs(depthRight - depthLeft) < 1, Math.Max(depthLeft, depthRight) + 1);
+        }
+        static bool IsFullTree(TreeNode root)
+        {
+            Stack<TreeNode> stack = new Stack<TreeNode>();
+            stack.Push(root);
+
+            // 总结点数
+            int totalNum = 1;
+            // 深度  这里初始化为 -1
+            int depth = -1;
+            while(stack.Count > 0)
+            {
+                int curLayerNum = stack.Count;
+                depth++;
+                for(int i = 0;i < curLayerNum;i++)
+                { 
+                    TreeNode node = stack.Pop();
+                    if(node.left != null)
+                    {
+                        stack.Push(node.left);
+                        totalNum++;
+                    }
+                    if (node.right != null)
+                    {
+                        stack.Push(node.right);
+                        totalNum++;
+                    }                        
+                }
+            }
+            if(totalNum == Math.Pow(2, depth) - 1)
+                return true;
+            return false;
+        }
         static bool IsCompleteTree(TreeNode root)
         {
             // https://leetcode.cn/problems/check-completeness-of-a-binary-tree/description/
