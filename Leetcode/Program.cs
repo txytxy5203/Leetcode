@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace Leetcode
+﻿namespace Leetcode
 {
     internal class Program
     {
@@ -38,28 +36,87 @@ namespace Leetcode
             //a1.left = null; a1.right = null;
 
 
-            Console.WriteLine(IsFullTree(a));
-            
+            Console.WriteLine(LowestCommonAncestor2(a, d, e).val);
+
 
         }
         #region 二叉树
+        static TreeNode GetSuccessorNode(TreeNode node)
+        {
+
+        }
+        static TreeNode LowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q)
+        {
+            // https://leetcode.cn/problems/lowest-common-ancestor-of-a-binary-tree/description/
+            // 一般的直观解法
+            // 先遍历
+            Dictionary<TreeNode, TreeNode> dic = new Dictionary<TreeNode, TreeNode>();
+            dic.Add(root, root);
+            LowestCommonAncestorRecur(root, dic);
+
+            HashSet<TreeNode> ancestor = new HashSet<TreeNode>();
+            TreeNode curr = p;
+            // 记得把自己也先添加进去
+            ancestor.Add(curr);
+            while (dic[curr] != curr)
+            {
+                ancestor.Add(dic[curr]);
+                curr = dic[curr];
+            }
+
+            curr = q;
+            while (!ancestor.Contains(curr))
+            {
+                curr = dic[curr];
+            }
+            return curr;
+        }
+        static void LowestCommonAncestorRecur(TreeNode node, Dictionary<TreeNode, TreeNode> dict)
+        {
+            if (node == null)
+                return;
+            if (node.left != null)
+                dict.Add(node.left, node);
+            if (node.right != null)
+                dict.Add(node.right, node);
+            LowestCommonAncestorRecur(node.left, dict);
+            LowestCommonAncestorRecur(node.right, dict);
+        }
+        static TreeNode LowestCommonAncestor2(TreeNode root, TreeNode p, TreeNode q)
+        {
+            // 所以说递归本质上就是把问题分成更小的相似的问题  从root节点去向下找  信息会从底下返回上来
+            // 实际上实现了一个“双向树”  如果一个节点能够知道自己的父节点那么这题就好办了
+            // 基础情况
+            if (root == null || root == p || root == q) 
+                return root;
+            TreeNode left = LowestCommonAncestor2(root.left, p, q);
+            TreeNode right = LowestCommonAncestor2(root.right, p, q);
+
+            if (left != null && right != null)
+                return root;
+            // 这一句要好好理解  自己写一下就明白了所有情况
+            return left != null ? left : right; 
+        }
         static bool IsBalanced(TreeNode root)
         {
             // https://leetcode.cn/problems/balanced-binary-tree/description/
-            // 左神的套路递归写法
+            // 左神的套路递归写法  每个Node都向自己的左右孩子要信息
             // 递归仔细体会一下也就那样嘛  加油别怕
             return IsBalancedRecur(root).isBalanced;
         }
         static (bool isBalanced, int depth) IsBalancedRecur(TreeNode root)
         {
+            // 这里的递归套路一定要仔细体会一下
             if (root == null)
                 return new(true, 0);
             (bool isBalancedLeft, int depthLeft) = IsBalancedRecur(root.left);
             (bool isBalancedRight, int depthRight) = IsBalancedRecur(root.right);
-            return (isBalancedLeft && isBalancedRight && Math.Abs(depthRight - depthLeft) < 1, Math.Max(depthLeft, depthRight) + 1);
+            return (isBalancedLeft && isBalancedRight && Math.Abs(depthRight - depthLeft) <= 1,
+                Math.Max(depthLeft, depthRight) + 1);
         }
         static bool IsFullTree(TreeNode root)
         {
+            // 自己想的方法 简单直观
             Stack<TreeNode> stack = new Stack<TreeNode>();
             stack.Push(root);
 
@@ -67,14 +124,14 @@ namespace Leetcode
             int totalNum = 1;
             // 深度  这里初始化为 -1
             int depth = -1;
-            while(stack.Count > 0)
+            while (stack.Count > 0)
             {
                 int curLayerNum = stack.Count;
                 depth++;
-                for(int i = 0;i < curLayerNum;i++)
-                { 
+                for (int i = 0; i < curLayerNum; i++)
+                {
                     TreeNode node = stack.Pop();
-                    if(node.left != null)
+                    if (node.left != null)
                     {
                         stack.Push(node.left);
                         totalNum++;
@@ -83,10 +140,10 @@ namespace Leetcode
                     {
                         stack.Push(node.right);
                         totalNum++;
-                    }                        
+                    }
                 }
             }
-            if(totalNum == Math.Pow(2, depth) - 1)
+            if (totalNum == Math.Pow(2, depth) - 1)
                 return true;
             return false;
         }
@@ -138,7 +195,7 @@ namespace Leetcode
             while (queue.Count > 0)
             {
                 TreeNode node;
-                node= queue.Dequeue();
+                node = queue.Dequeue();
 
                 //if (checkLeaf)
                 //{
@@ -154,7 +211,7 @@ namespace Leetcode
                 if ((checkLeaf && (node.left != null || node.right != null))
                     || (node.left == null && node.right != null))
                 {
-                   return false;
+                    return false;
                 }
 
                 if (node.left != null)
@@ -166,12 +223,12 @@ namespace Leetcode
                     queue.Enqueue(node.right);
                 }
                 else
-                { 
+                {
                     checkLeaf = true;
-                }                              
+                }
             }
             return true;
-        }              
+        }
         static bool IsValidBST(TreeNode root)
         {
             // https://leetcode.cn/problems/validate-binary-search-tree/description/
@@ -179,7 +236,7 @@ namespace Leetcode
             IList<int> list = new List<int>();
             //中序遍历的时候已经生成了list 检查list即可
             inOrderRecur(root, list);
-            for (int i = 0; i < list.Count - 1; i++) 
+            for (int i = 0; i < list.Count - 1; i++)
             {
                 if (!(list[i] < list[i + 1]))
                     return false;
@@ -193,10 +250,10 @@ namespace Leetcode
         }
         static bool IsValidBST2(TreeNode node, long lower, long upper)
         {
-            if(node == null) 
+            if (node == null)
                 return true;
 
-            if(node.val < lower || node.val > upper)
+            if (node.val < lower || node.val > upper)
                 return false;
             return IsValidBST2(node.left, lower, node.val) && IsValidBST2(node.right, node.val, upper);
         }
@@ -218,13 +275,13 @@ namespace Leetcode
                 else
                 {
                     root = stack.Pop();
-                    if(root.val > temp)
+                    if (root.val > temp)
                     {
                         // 一定要注意这里的顺序
                         // 先比较再赋值
                         temp = root.val;
                         root = root.right;
-                    }                  
+                    }
                     else
                     {
                         return false;
@@ -233,6 +290,27 @@ namespace Leetcode
             }
             return true;
         }
+        static bool IsValidBST4(TreeNode root)
+        {
+            // 左神的套路递归写法
+            return IsValidBST4Recur(root).isValid;
+        }
+        static (bool isValid, long min, long max) IsValidBST4Recur(TreeNode root)
+        {
+            // 节点为空时  传最大最小值要注意
+            if (root == null)
+                return (true, long.MaxValue, long.MinValue);
+            (bool left, long leftMin, long leftMax) = IsValidBST4Recur(root.left);
+            (bool right, long rightMin, long rightMax) = IsValidBST4Recur(root.right);
+
+
+            // 左右子树的最大最小值逻辑一定要理清楚!!!
+            return (left && right
+                    && root.val > leftMax
+                    && root.val < rightMin,
+                    Math.Min(root.val, leftMin),
+                    Math.Max(root.val, rightMax));
+        }
         static int WidthOfBinaryTree(TreeNode root)
         {
             // https://leetcode.cn/problems/maximum-width-of-binary-tree/description/
@@ -240,7 +318,7 @@ namespace Leetcode
             // 最后通过编号来计算宽度
             if (root == null) return 0;
             Queue<(TreeNode, int)> queue = new Queue<(TreeNode, int)>();
-            
+
             int currId = 0;
             int max = 1;
 
@@ -256,21 +334,21 @@ namespace Leetcode
                 {
                     TreeNode node;
                     (node, currId) = queue.Dequeue();
-                    if(i == 0)
+                    if (i == 0)
                         first = currId;
-                    if(i == temp - 1)
+                    if (i == temp - 1)
                         last = currId;
 
                     if (node.left != null)
                     {
                         queue.Enqueue((node.left, currId * 2 + 1));
-                    }                 
+                    }
                     if (node.right != null)
                     {
                         queue.Enqueue((node.right, currId * 2 + 2));
                     }
                 }
-                max = Math.Max(max, last - first + 1);              
+                max = Math.Max(max, last - first + 1);
             }
             return max;
         }
@@ -280,7 +358,7 @@ namespace Leetcode
             // 二叉树的层序遍历 也叫 宽度遍历   BFS   leetcode上面的题解讲得很好
             // https://leetcode.cn/problems/binary-tree-level-order-traversal/solutions/244853/bfs-de-shi-yong-chang-jing-zong-jie-ceng-xu-bian-l/
             if (root == null) return new List<IList<int>>();
-            Queue<TreeNode> queue = new Queue<TreeNode>();           
+            Queue<TreeNode> queue = new Queue<TreeNode>();
             queue.Enqueue(root);
 
             IList<IList<int>> res = new List<IList<int>>();
@@ -291,7 +369,7 @@ namespace Leetcode
                 int temp = queue.Count;
                 IList<int> list = new List<int>();
                 for (int i = 0; i < temp; i++)
-                { 
+                {
                     TreeNode node = queue.Dequeue();
                     list.Add(node.val);
 
@@ -323,6 +401,14 @@ namespace Leetcode
             preOrderRecur(head.left, list);
             preOrderRecur(head.right, list);
         }
+        static void preOrderRecur(TreeNode head)
+        {
+            //前序遍历 在第一次进入节点时 执行逻辑
+            if (head == null)
+                return;
+            preOrderRecur(head.left);
+            preOrderRecur(head.right);
+        }
         static void inOrderRecur(TreeNode head, IList<int> list)
         {
             //中序遍历  在第二次进入节点的时候 执行逻辑
@@ -353,6 +439,7 @@ namespace Leetcode
         {
             // 中序遍历 不使用递归
             // 这个代码要好好理解一下
+            // 先让左边的进栈
             if (head == null) return;
             Stack<TreeNode> stack = new Stack<TreeNode>();
 
@@ -879,6 +966,18 @@ namespace Leetcode
             this.val = val;
             this.left = left;
             this.right = right;
+        }
+    }
+    public class TreeNode2
+    {
+        // 能够知道自己的父节点
+        public int val;
+        public TreeNode2 left;
+        public TreeNode2 right;
+        public TreeNode2 parent;
+        public TreeNode2(int _val)
+        {
+            val = _val;
         }
     }
 }
