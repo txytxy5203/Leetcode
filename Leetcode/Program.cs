@@ -1,4 +1,6 @@
-﻿namespace Leetcode
+﻿using System.Text;
+
+namespace Leetcode
 {
     internal class Program
     {
@@ -36,13 +38,65 @@
             //a1.left = null; a1.right = null;
 
 
-            Console.WriteLine(LowestCommonAncestor2(a, d, e).val);
 
+            Temp(4);
 
         }
-        #region 二叉树
-        static TreeNode GetSuccessorNode(TreeNode node)
+        #region 数学
+        static void Rotate(int[][] matrix)
         {
+            // 根据理解写公式即可
+        }
+        #endregion
+        #region 二叉树
+        static void Temp(int n)
+        {
+            TreeNode root = TempRecur(0, n);
+            IList<IList<int>> list = LevelOrder(root);
+            foreach (var i in list)
+            { 
+                foreach (var j in i)
+                {
+                    Console.WriteLine(j);
+                }
+                Console.WriteLine("-------");
+            }
+        }
+        static TreeNode TempRecur(int value, int depth)
+        {
+            if (depth == 0)
+                return null;
+            TreeNode node = new TreeNode(value);
+            node.left = TempRecur(0, depth - 1);
+            node.right = TempRecur(1, depth - 1);
+            return node;
+        }
+        static TreeNode2 GetSuccessorNode(TreeNode2 node)
+        {
+            if (node == null) return null;
+
+            if (node.right != null)
+            {
+                // 右树不为空 则返回右树上最左边的节点
+                TreeNode2 curr = node.right;
+                while (curr.left != null)
+                {
+                    curr = curr.left;
+                }
+                return curr;
+            }
+            else
+            {
+                // 这里和左神写的不一样  还没有验算
+                while (node != node.parent?.left)
+                {
+                    node = node.parent;
+                    // 如果是树的最右边的节点 则直接返回null
+                    if (node == null)
+                        return null;
+                }
+            }             
+            return node.parent;
 
         }
         static TreeNode LowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q)
@@ -978,6 +1032,56 @@
         public TreeNode2(int _val)
         {
             val = _val;
+        }
+    }
+    public class Codec
+    {
+        // https://leetcode.cn/problems/xu-lie-hua-er-cha-shu-lcof/description/
+        // Encodes a tree to a single string.
+        public string serialize(TreeNode root)
+        {
+            // 序列化
+            StringBuilder str = new StringBuilder();
+            PreOrderRecur(root, str);
+            return str.ToString();
+        }
+
+        // Decodes your encoded data to tree.
+        public TreeNode deserialize(string data)
+        {
+            // 反序列化
+            string[] strs = data.Split("_");
+            Queue<String> queue = new Queue<String>();
+            foreach (string str in strs)
+            {
+                queue.Enqueue(str);
+            }
+            return ReconPreOrder(queue);
+        }
+        TreeNode ReconPreOrder(Queue<String> queue)
+        {
+            // 构造一棵二叉树  当然可以用递归
+            // 递归递归又是递归 ！！！
+            String value = queue.Dequeue();
+            if (value == "#")
+            {
+                return null;
+            }
+            TreeNode node = new TreeNode(Int32.Parse(value));
+            node.left = ReconPreOrder(queue);
+            node.right = ReconPreOrder(queue);
+            return node;
+        }
+        void PreOrderRecur(TreeNode root, StringBuilder _str)
+        {
+            if (root == null)
+            { 
+                _str.Append("#" + "_");
+                return;
+            }
+            _str.Append(root.val.ToString() + "_");
+            PreOrderRecur(root.left, _str);
+            PreOrderRecur(root.right, _str);
         }
     }
 }
